@@ -24,6 +24,7 @@ func main() {
         <body>
             <h1>Sistema de Despliegue Seguro</h1>
             <img src="/static/logo.png" alt="Logo" />
+			<p>Este es un texto de prueba</p>
         </body>
         </html>`
 		w.Write([]byte(html))
