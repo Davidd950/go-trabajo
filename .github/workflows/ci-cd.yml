@@ -36,14 +36,6 @@ jobs:
         working-directory: ./src
         run: go mod download
 
-      - name: Install Go tools
-        working-directory: ./src
-        run: |
-          go install cmd/covdata@latest
-          go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-
-
-
       - name: Build
         working-directory: ./src
         run: go build -v -o app .
