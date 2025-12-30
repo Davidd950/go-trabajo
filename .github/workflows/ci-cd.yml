@@ -131,10 +131,10 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     environment:
       name: staging
-      url: https://github.com/Davidd950/go-trabajo/tree/develop
+      url: http://52.18.29.181  # Staging server
     steps:
       - name: Deploy to staging
-        run: |
+        run: | 
           echo "Deploying to staging environment"
 
   # Job 5: Deploy to Production
