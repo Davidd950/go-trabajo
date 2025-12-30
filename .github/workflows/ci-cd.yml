@@ -131,7 +131,7 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     environment:
       name: staging
-      url:  http://172.31.4.210
+      url:  172.31.4.210
     steps:
       - name: Despliegue en staging
         run: | 
@@ -144,7 +144,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     environment:
       name: production
-      url: http://52.18.29.181
+      url: 52.18.29.181
     steps:
       - name: Despliegue en producción
         run: |
