@@ -58,7 +58,7 @@ jobs:
     needs: build-and-test
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3 
 
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
