@@ -43,7 +43,7 @@ jobs:
       - name: Run tests
         working-directory: ./src
         env:
-          GOEXPERIMENT: coverageredesign=0
+          GOEXPERIMENT: nocoverageredesign
         run: go test -v -coverprofile=coverage.txt ./...
 
       - name: Upload coverage
