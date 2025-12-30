@@ -53,3 +53,29 @@ func logRequest(r *http.Request, status int) {
 	jsonLog, _ := json.Marshal(entry)
 	log.Println(string(jsonLog))
 }
+
+type statusResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (w *statusResponseWriter) WriteHeader(code int) {
+	w.statusCode = code
+	w.ResponseWriter.WriteHeader(code)
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		ww := &statusResponseWriter{
+			ResponseWriter: w,
+			statusCode:     http.StatusOK,
+		}
+
+		start := time.Now()
+		next.ServeHTTP(ww, r)
+		_ = time.Since(start)
+
+		logRequest(r, ww.statusCode)
+	})
+}
