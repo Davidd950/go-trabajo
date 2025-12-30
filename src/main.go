@@ -14,16 +14,15 @@ func main() {
 		port = "8080"
 	}
 
-mux := http.NewServeMux()
+	mux := http.NewServeMux()
 
-mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
-mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte("OK"))
-})
-
+		mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("OK"))
+		})
 
 		w.Header().Set("Content-Type", "text/html")
 		html := `<!DOCTYPE html>
@@ -41,6 +40,16 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Servidor iniciado en puerto %s", port)
 	handler := loggingMiddleware(mux)
 	log.Fatal(http.ListenAndServe(":"+port, handler))
+	// log.Fatal(http.ListenAndServe(":"+port, loggingMiddleware(mux)))
+
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
+	mux.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "Error interno simulado", http.StatusInternalServerError)
+	})
 
 }
 

@@ -1,9 +1,12 @@
 # Dockerfile
-FROM golang:1.21-alpine AS builder
+FROM golang:1.20-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+# COPY go.mod go.sum ./
+COPY go.mod ./
+# skip go.sum because it doesn't exist
+# RUN go mod download
 RUN go mod download
 
 COPY . .
