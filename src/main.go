@@ -14,9 +14,17 @@ func main() {
 		port = "8080"
 	}
 
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+mux := http.NewServeMux()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+
+mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("OK"))
+})
+
+
 		w.Header().Set("Content-Type", "text/html")
 		html := `<!DOCTYPE html>
         <html>
@@ -31,7 +39,9 @@ func main() {
 	})
 
 	log.Printf("Servidor iniciado en puerto %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	handler := loggingMiddleware(mux)
+	log.Fatal(http.ListenAndServe(":"+port, handler))
+
 }
 
 type LogEntry struct {
