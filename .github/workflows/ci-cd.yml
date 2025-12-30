@@ -7,12 +7,12 @@ on:
     branches: [ main, develop ]
 
 env:
-  GO_VERSION: '1.21'
+  GO_VERSION: '1.20.x'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # Job 1: Build y Tests
+  # Job 1: Build and Tests
   build-and-test:
     runs-on: ubuntu-latest
     steps:
@@ -23,14 +23,17 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
-          check-latest: true
 
+      - name: Verify Go version
+        run: go version
 
       - name: Cache Go modules
         uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Install dependencies
         working-directory: ./src
@@ -40,16 +43,14 @@ jobs:
         working-directory: ./src
         run: go build -v -o app .
 
-      - name: Run tests
+      - name: Run tests with coverage
         working-directory: ./src
-        env:
-          GOEXPERIMENT: nocoverageredesign
         run: go test -v -coverprofile=coverage.txt ./...
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
-          file: ./src/coverage.txt
+          files: ./src/coverage.txt
 
   # Job 2: Security Analysis (SAST)
   security-scan:
@@ -62,9 +63,9 @@ jobs:
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
         with:
-         args: '-severity high -fmt sarif -out gosec-results.sarif ./...'
+          args: '-severity high -fmt sarif -out gosec-results.sarif ./...'
 
-      - name: Upload SARIF file
+      - name: Upload Gosec SARIF
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: gosec-results.sarif
@@ -72,14 +73,14 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          exit-code: '1'
-          severity: 'HIGH,CRITICAL'
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          exit-code: 1
 
-      - name: Upload Trivy results
+      - name: Upload Trivy SARIF
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: trivy-results.sarif
@@ -112,7 +113,7 @@ jobs:
             type=ref,event=branch
             type=sha,prefix={{branch}}-
 
-      - name: Build and push
+      - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -129,13 +130,11 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     environment:
       name: staging
-      url: https://github.com/Davidd950/go-trabajo/tree/develop 
+      url: https://github.com/Davidd950/go-trabajo/tree/develop
     steps:
       - name: Deploy to staging
         run: |
           echo "Deploying to staging environment"
-          # Aquí iría tu comando de despliegue real
-          # Ejemplo: kubectl set image deployment/app app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop-${{ github.sha }}
 
   # Job 5: Deploy to Production
   deploy-production:
@@ -144,9 +143,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     environment:
       name: production
-      url: https://github.com/Davidd950/go-trabajo/tree/develop 
+      url: https://github.com/Davidd950/go-trabajo/tree/main
     steps:
-      - name: Despliegue
+      - name: Deploy to production
         run: |
           echo "Deploying to production environment"
-          # Comando de despliegue a producción
